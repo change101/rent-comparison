@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apartment Cost Comparison Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 30px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .comparison-table tr:nth-child(even) {
+            background-color: rgba(102, 126, 234, 0.02);
+        }
+        .comparison-table tr:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+            transform: scale(1.001);
+            transition: all 0.2s ease;
+        }
+        .cost-input {
+            width: 100px;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: white;
+            -moz-appearance: textfield;
+        }
+        .cost-input::-webkit-outer-spin-button,
+        .cost-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .cost-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        .apartment-name {
+            width: 140px;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 5px;
+        }
+        .apartment-name:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        .apartment-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .url-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        .url-input {
+            width: 120px;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .url-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .url-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .url-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .url-button:active {
+            transform: translateY(0px);
+        }
+        .comment-field {
+            width: 140px;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            resize: vertical;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .comment-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .total-row {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%) !important;
+            font-weight: 700;
+            border-top: 2px solid #22c55e;
+        }
+        .annual-row {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%) !important;
+            font-weight: 700;
+            border-top: 2px solid #fbbf24;
+        }
+        .cost-category {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(102, 126, 234, 0.02) 100%);
+            font-weight: 600;
+            text-align: left;
+            padding-left: 24px;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        .add-apartment {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 15px 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .add-apartment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .instructions {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .best-deal {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.1) 100%) !important;
+            border: 2px solid #22c55e !important;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); }
+            to { box-shadow: 0 0 30px rgba(34, 197, 94, 0.4); }
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 26px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        .csv-button {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 15px 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+        }
+        .csv-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .delete-apartment {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+            margin-top: 4px;
+        }
+        .delete-apartment:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        .notes-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        .notes-section ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .notes-section li {
+            margin: 8px 0;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Apartment Cost Comparison Calculator</h1>
+        
+        <div class="instructions">
+            <strong>Instructions:</strong> Enter the costs for each apartment in the corresponding fields. Monthly totals and annual costs will be calculated automatically. The apartment with the lowest total cost will be highlighted in green.
+        </div>
+
+        <div class="button-container">
+            <button class="add-apartment" onclick="addApartment()">+ Add Apartment</button>
+            <button class="csv-button" onclick="downloadCSV()">📊 Download CSV</button>
+        </div>
+        
+        <table class="comparison-table" id="comparisonTable">
+            <thead>
+                <tr>
+                    <th style="width: 200px;">Cost Category</th>
+                    <th>Apartment 1</th>
+                    <th>Apartment 2</th>
+                    <th>Apartment 3</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="cost-category">Apartment Name</td>
+                    <td>
+                        <div class="apartment-header">
+                            <input type="text" class="apartment-name" value="Apartment 1" onchange="updateApartmentName(this, 1)">
+                            <button class="delete-apartment" onclick="deleteApartment(1)" title="Delete Apartment">🗑️ Delete</button>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="apartment-header">
+                            <input type="text" class="apartment-name" value="Apartment 2" onchange="updateApartmentName(this, 2)">
+                            <button class="delete-apartment" onclick="deleteApartment(2)" title="Delete Apartment">🗑️ Delete</button>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="apartment-header">
+                            <input type="text" class="apartment-name" value="Apartment 3" onchange="updateApartmentName(this, 3)">
+                            <button class="delete-apartment" onclick="deleteApartment(3)" title="Delete Apartment">🗑️ Delete</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Bedrooms</td>
+                    <td><input type="text" class="apartment-name" id="bedrooms_1" placeholder="e.g., 2"></td>
+                    <td><input type="text" class="apartment-name" id="bedrooms_2" placeholder="e.g., 2"></td>
+                    <td><input type="text" class="apartment-name" id="bedrooms_3" placeholder="e.g., 2"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Bathrooms</td>
+                    <td><input type="text" class="apartment-name" id="bathrooms_1" placeholder="e.g., 2"></td>
+                    <td><input type="text" class="apartment-name" id="bathrooms_2" placeholder="e.g., 2"></td>
+                    <td><input type="text" class="apartment-name" id="bathrooms_3" placeholder="e.g., 2"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Den/Office</td>
+                    <td>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="den_1">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="den_2">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="den_3">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Size (sq ft)</td>
+                    <td><input type="text" class="apartment-name" id="size_1" placeholder="e.g., 1200"></td>
+                    <td><input type="text" class="apartment-name" id="size_2" placeholder="e.g., 1200"></td>
+                    <td><input type="text" class="apartment-name" id="size_3" placeholder="e.g., 1200"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Address</td>
+                    <td><input type="text" class="apartment-name" id="address_1" placeholder="Full address"></td>
+                    <td><input type="text" class="apartment-name" id="address_2" placeholder="Full address"></td>
+                    <td><input type="text" class="apartment-name" id="address_3" placeholder="Full address"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Listing URL</td>
+                    <td>
+                        <div class="url-container">
+                            <input type="url" class="url-input" id="url_1" placeholder="https://...">
+                            <button class="url-button" onclick="openUrl('url_1')" title="Open URL">🔗</button>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="url-container">
+                            <input type="url" class="url-input" id="url_2" placeholder="https://...">
+                            <button class="url-button" onclick="openUrl('url_2')" title="Open URL">🔗</button>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="url-container">
+                            <input type="url" class="url-input" id="url_3" placeholder="https://...">
+                            <button class="url-button" onclick="openUrl('url_3')" title="Open URL">🔗</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Monthly Rent ($)</td>
+                    <td><input type="number" class="cost-input" id="rent_1" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="rent_2" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="rent_3" oninput="calculateTotals()" placeholder="0"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Admin Fee (One-time) ($)</td>
+                    <td><input type="number" class="cost-input" id="admin_1" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="admin_2" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="admin_3" oninput="calculateTotals()" placeholder="0"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Internet (Monthly) ($)</td>
+                    <td><input type="number" class="cost-input" id="internet_1" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="internet_2" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="internet_3" oninput="calculateTotals()" placeholder="0"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Trash (Monthly) ($)</td>
+                    <td><input type="number" class="cost-input" id="trash_1" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="trash_2" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="trash_3" oninput="calculateTotals()" placeholder="0"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Electricity (Monthly) ($)</td>
+                    <td><input type="number" class="cost-input" id="electricity_1" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="electricity_2" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="electricity_3" oninput="calculateTotals()" placeholder="0"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Other Utilities (Monthly) ($)</td>
+                    <td><input type="number" class="cost-input" id="utilities_1" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="utilities_2" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="utilities_3" oninput="calculateTotals()" placeholder="0"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Parking - Car 1 (Monthly) ($)</td>
+                    <td><input type="number" class="cost-input" id="parking1_1" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="parking1_2" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="parking1_3" oninput="calculateTotals()" placeholder="0"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Parking - Car 2 (Monthly) ($)</td>
+                    <td><input type="number" class="cost-input" id="parking2_1" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="parking2_2" oninput="calculateTotals()" placeholder="0"></td>
+                    <td><input type="number" class="cost-input" id="parking2_3" oninput="calculateTotals()" placeholder="0"></td>
+                </tr>
+                <tr>
+                    <td class="cost-category">Comments / Notes</td>
+                    <td><textarea class="comment-field" id="comments_1" placeholder="Add notes about this apartment..." rows="3"></textarea></td>
+                    <td><textarea class="comment-field" id="comments_2" placeholder="Add notes about this apartment..." rows="3"></textarea></td>
+                    <td><textarea class="comment-field" id="comments_3" placeholder="Add notes about this apartment..." rows="3"></textarea></td>
+                </tr>
+                <tr class="total-row">
+                    <td class="cost-category">Total Monthly Cost ($)</td>
+                    <td id="monthly_total_1">$0.00</td>
+                    <td id="monthly_total_2">$0.00</td>
+                    <td id="monthly_total_3">$0.00</td>
+                </tr>
+                <tr class="annual-row">
+                    <td class="cost-category">Total Annual Cost (incl. admin fee) ($)</td>
+                    <td id="annual_total_1">$0.00</td>
+                    <td id="annual_total_2">$0.00</td>
+                    <td id="annual_total_3">$0.00</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="notes-section">
+            <strong>Notes:</strong>
+            <ul>
+                <li>Admin fees are one-time costs added to the first year total</li>
+                <li>All other costs are calculated as monthly recurring expenses</li>
+                <li>The apartment with the lowest annual total will be highlighted in green with a glow effect</li>
+                <li>You can add more apartments using the "Add Apartment" button</li>
+                <li>Click the 🔗 button next to URLs to open listings in a new tab</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let apartmentCount = 3;
+
+        function calculateTotals() {
+            const costs = ['rent', 'internet', 'trash', 'electricity', 'utilities', 'parking1', 'parking2'];
+            let lowestCost = Infinity;
+            let lowestIndex = -1;
+
+            for (let i = 1; i <= apartmentCount; i++) {
+                let monthlyTotal = 0;
+                
+                // Calculate monthly recurring costs
+                costs.forEach(cost => {
+                    const value = parseFloat(document.getElementById(cost + '_' + i)?.value || 0);
+                    monthlyTotal += value;
+                });
+
+                // Get admin fee (one-time)
+                const adminFee = parseFloat(document.getElementById('admin_' + i)?.value || 0);
+                
+                // Calculate annual total (12 months + admin fee)
+                const annualTotal = (monthlyTotal * 12) + adminFee;
+
+                // Update displays
+                const monthlyElement = document.getElementById('monthly_total_' + i);
+                const annualElement = document.getElementById('annual_total_' + i);
+                
+                if (monthlyElement) monthlyElement.textContent = '$' + monthlyTotal.toFixed(2);
+                if (annualElement) annualElement.textContent = '$' + annualTotal.toFixed(2);
+
+                // Track lowest cost for highlighting
+                if (annualTotal > 0 && annualTotal < lowestCost) {
+                    lowestCost = annualTotal;
+                    lowestIndex = i;
+                }
+            }
+
+            // Highlight the best deal
+            highlightBestDeal(lowestIndex);
+        }
+
+        function highlightBestDeal(bestIndex) {
+            // Remove 'best-deal' from any previously highlighted total cells
+            const highlightedCells = document.querySelectorAll('.best-deal');
+            highlightedCells.forEach(cell => cell.classList.remove('best-deal'));
+            
+            // Add highlighting to the annual total cell for the best deal
+            if (bestIndex > 0) {
+                const annualTotalCell = document.getElementById('annual_total_' + bestIndex);
+                if (annualTotalCell) {
+                    annualTotalCell.classList.add('best-deal');
+                }
+            }
+        }
+
+        function updateApartmentName(input, index) {
+            // The header is the (index + 1)th child, since the first child is "Cost Category"
+            const headerCell = document.querySelector(`#comparisonTable thead th:nth-child(${index + 1})`);
+            if (headerCell && input.value.trim()) {
+                headerCell.textContent = input.value;
+            }
+        }
+
+        function openUrl(inputId) {
+            const urlInput = document.getElementById(inputId);
+            const url = urlInput.value.trim();
+            
+            if (url) {
+                // Add https:// if no protocol is specified
+                const finalUrl = url.startsWith('http') ? url : 'https://' + url;
+                window.open(finalUrl, '_blank');
+            } else {
+                alert('Please enter a URL first');
+            }
+        }
+
+        function deleteApartment(apartmentIndex) {
+            if (apartmentCount <= 2) {
+                alert('You must have at least 2 apartments to compare!');
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete this apartment?')) {
+                const table = document.getElementById('comparisonTable');
+                const headerRow = table.querySelector('thead tr');
+                
+                // Remove header cell
+                headerRow.children[apartmentIndex].remove();
+                
+                // Remove body cells from each row
+                const bodyRows = table.querySelectorAll('tbody tr');
+                bodyRows.forEach(row => {
+                    row.children[apartmentIndex].remove();
+                });
+
+                // Shift apartment indices and update IDs for all subsequent columns
+                for (let i = apartmentIndex + 1; i <= apartmentCount; i++) {
+                    const newIndex = i - 1;
+                    const currentColumnIndexInDOM = newIndex; // The DOM index is now newIndex
+
+                    // Update header text from the name input
+                    const nameInputForHeader = bodyRows[0].children[currentColumnIndexInDOM].querySelector('.apartment-name');
+                    const headerToUpdate = headerRow.children[currentColumnIndexInDOM];
+                    if (headerToUpdate && nameInputForHeader) {
+                        headerToUpdate.textContent = nameInputForHeader.value;
+                    }
+                    
+                    // Update all input IDs and function calls in the shifted column
+                    bodyRows.forEach((row) => {
+                        const cell = row.children[currentColumnIndexInDOM];
+                        if (cell) {
+                            // Update input/textarea IDs
+                            const inputs = cell.querySelectorAll('input, textarea');
+                            inputs.forEach(input => {
+                                if (input.id) {
+                                    input.id = input.id.replace('_' + i, '_' + newIndex);
+                                }
+                            });
+                            
+                            // Update function calls in onclick attributes
+                            const buttons = cell.querySelectorAll('button');
+                            buttons.forEach(button => {
+                                const onclickAttr = button.getAttribute('onclick');
+                                if (onclickAttr) {
+                                    button.setAttribute('onclick', onclickAttr.replace(`(${i})`, `(${newIndex})`).replace(`'url_${i}'`, `'url_${newIndex}'`));
+                                }
+                            });
+                            
+                            // Update onchange attributes
+                            const nameInputs = cell.querySelectorAll('input[onchange]');
+                            nameInputs.forEach(input => {
+                                const onchangeAttr = input.getAttribute('onchange');
+                                if (onchangeAttr) {
+                                    input.setAttribute('onchange', onchangeAttr.replace(`, ${i})`, `, ${newIndex})`));
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                apartmentCount--;
+                calculateTotals();
+            }
+        }
+
+        function downloadCSV() {
+            const data = [];
+            const headers = ['Category'];
+            
+            // Get apartment names for headers
+            for (let i = 1; i <= apartmentCount; i++) {
+                const nameInput = document.querySelector(`input[onchange*="updateApartmentName(this, ${i})"]`);
+                const apartmentName = nameInput ? nameInput.value || `Apartment ${i}` : `Apartment ${i}`;
+                headers.push(apartmentName);
+            }
+            data.push(headers);
+            
+            // Define all categories
+            const categories = [
+                { label: 'Bedrooms', id: 'bedrooms' },
+                { label: 'Bathrooms', id: 'bathrooms' },
+                { label: 'Den/Office', id: 'den', isToggle: true },
+                { label: 'Size (sq ft)', id: 'size' },
+                { label: 'Address', id: 'address' },
+                { label: 'Listing URL', id: 'url' },
+                { label: 'Monthly Rent ($)', id: 'rent' },
+                { label: 'Admin Fee (One-time) ($)', id: 'admin' },
+                { label: 'Internet (Monthly) ($)', id: 'internet' },
+                { label: 'Trash (Monthly) ($)', id: 'trash' },
+                { label: 'Electricity (Monthly) ($)', id: 'electricity' },
+                { label: 'Other Utilities (Monthly) ($)', id: 'utilities' },
+                { label: 'Parking - Car 1 (Monthly) ($)', id: 'parking1' },
+                { label: 'Parking - Car 2 (Monthly) ($)', id: 'parking2' },
+                { label: 'Comments/Notes', id: 'comments' }
+            ];
+            
+            // Add data rows
+            categories.forEach(category => {
+                const row = [category.label];
+                for (let i = 1; i <= apartmentCount; i++) {
+                    const element = document.getElementById(`${category.id}_${i}`);
+                    let value = '';
+                    
+                    if (element) {
+                        if (category.isToggle) {
+                            value = element.checked ? 'Yes' : 'No';
+                        } else {
+                            value = element.value || '';
+                        }
+                    }
+                    row.push(value);
+                }
+                data.push(row);
+            });
+            
+            // Add totals
+            const monthlyRow = ['Total Monthly Cost ($)'];
+            const annualRow = ['Total Annual Cost (incl. admin fee) ($)'];
+            
+            for (let i = 1; i <= apartmentCount; i++) {
+                const monthlyElement = document.getElementById(`monthly_total_${i}`);
+                const annualElement = document.getElementById(`annual_total_${i}`);
+                
+                monthlyRow.push(monthlyElement ? monthlyElement.textContent.replace('$', '') : '0.00');
+                annualRow.push(annualElement ? annualElement.textContent.replace('$', '') : '0.00');
+            }
+            
+            data.push(monthlyRow);
+            data.push(annualRow);
+            
+            // Convert to CSV
+            const csvContent = data.map(row =>
+                row.map(field => `"${field.toString().replace(/"/g, '""')}"`).join(',')
+            ).join('\n');
+            
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'apartment_comparison.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function addApartment() {
+            apartmentCount++;
+            const table = document.getElementById('comparisonTable');
+            const headerRow = table.querySelector('thead tr');
+            const bodyRows = table.querySelectorAll('tbody tr');
+
+            // Add header
+            const newHeader = document.createElement('th');
+            newHeader.textContent = 'Apartment ' + apartmentCount;
+            headerRow.appendChild(newHeader);
+
+            // Add cells to each row
+            bodyRows.forEach((row, rowIndex) => {
+                const newCell = document.createElement('td');
+                
+                if (rowIndex === 0) { // Apartment name row
+                    newCell.innerHTML = `
+                        <div class="apartment-header">
+                            <input type="text" class="apartment-name" value="Apartment ${apartmentCount}" onchange="updateApartmentName(this, ${apartmentCount})">
+                            <button class="delete-apartment" onclick="deleteApartment(${apartmentCount})" title="Delete Apartment">🗑️ Delete</button>
+                        </div>
+                    `;
+                } else if (rowIndex === 1) { // Bedrooms
+                    newCell.innerHTML = `<input type="text" class="apartment-name" id="bedrooms_${apartmentCount}" placeholder="e.g., 2">`;
+                } else if (rowIndex === 2) { // Bathrooms
+                    newCell.innerHTML = `<input type="text" class="apartment-name" id="bathrooms_${apartmentCount}" placeholder="e.g., 2">`;
+                } else if (rowIndex === 3) { // Den
+                    newCell.innerHTML = `
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="den_${apartmentCount}">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    `;
+                } else if (rowIndex === 4) { // Size
+                    newCell.innerHTML = `<input type="text" class="apartment-name" id="size_${apartmentCount}" placeholder="e.g., 1200">`;
+                } else if (rowIndex === 5) { // Address
+                    newCell.innerHTML = `<input type="text" class="apartment-name" id="address_${apartmentCount}" placeholder="Full address">`;
+                } else if (rowIndex === 6) { // URL
+                    newCell.innerHTML = `
+                        <div class="url-container">
+                            <input type="url" class="url-input" id="url_${apartmentCount}" placeholder="https://...">
+                            <button class="url-button" onclick="openUrl('url_${apartmentCount}')" title="Open URL">🔗</button>
+                        </div>
+                    `;
+                } else if (rowIndex === bodyRows.length - 3) { // Comments row
+                    newCell.innerHTML = `<textarea class="comment-field" id="comments_${apartmentCount}" placeholder="Add notes about this apartment..." rows="3"></textarea>`;
+                } else if (rowIndex === bodyRows.length - 2) { // Monthly total row
+                    newCell.id = 'monthly_total_' + apartmentCount;
+                    newCell.textContent = '$0.00';
+                } else if (rowIndex === bodyRows.length - 1) { // Annual total row
+                    newCell.id = 'annual_total_' + apartmentCount;
+                    newCell.textContent = '$0.00';
+                } else { // Input rows
+                    const costs = ['rent', 'admin', 'internet', 'trash', 'electricity', 'utilities', 'parking1', 'parking2'];
+                    const costIndex = rowIndex - 7; // Adjust for new description rows
+                    if (costIndex >= 0 && costIndex < costs.length) {
+                        const inputId = costs[costIndex] + '_' + apartmentCount;
+                        newCell.innerHTML = `<input type="number" class="cost-input" id="${inputId}" oninput="calculateTotals()" placeholder="0">`;
+                    }
+                }
+                
+                row.appendChild(newCell);
+            });
+
+            calculateTotals();
+        }
+
+        // Initialize calculations on page load
+        window.onload = calculateTotals;
+    </script>
+</body>
+</html>
